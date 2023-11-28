@@ -1,7 +1,7 @@
 # 2023-2024 Fall Analysis of Algorithms 1 Project 2
 
-[![C++ Lint with cppcheck](https://github.com/baglayan/blg335e-hw1/actions/workflows/cpp-lint.yml/badge.svg)](https://github.com/baglayan/blg335e-hw1/actions/workflows/cpp-lint.yml)
-[![Docker build, run, test](https://github.com/baglayan/blg335e-hw1/actions/workflows/docker-image.yml/badge.svg)](https://github.com/baglayan/blg335e-hw1/actions/workflows/docker-image.yml)
+[![C++ Lint with cppcheck](https://github.com/baglayan/blg335e-hw2/actions/workflows/cpp-lint.yml/badge.svg)](https://github.com/baglayan/blg335e-hw2/actions/workflows/cpp-lint.yml)
+[![Docker build, run, test](https://github.com/baglayan/blg335e-hw2/actions/workflows/docker-image.yml/badge.svg)](https://github.com/baglayan/blg335e-hw2/actions/workflows/docker-image.yml)
 
 ## Introduction
 

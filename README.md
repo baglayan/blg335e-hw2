@@ -5,14 +5,14 @@
 
 ## Introduction
 
-This project implements a TBA algorithm.
+This project implements a Heapsort algorithm.
 
 ## How to Build and Run
 
 To build and run this project:
 1. Clone the repository.
 2. Navigate to the project directory.
-3. Execute `g++ -fdiagnostics-color=always -g TBA.cpp -o TBA`
+3. Execute `g++ -fdiagnostics-color=always -g Heapsort.cpp -o Heapsort`
 4. Run the execute with the following format: TBA
 
 ## GitHub Workflows (to be added)

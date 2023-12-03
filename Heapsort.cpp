@@ -27,6 +27,9 @@ enum Args
     DATASET = 1,
     FUNCTION = 2,
     OUTPUT = 3,
+    OPTIONAL1 = 4,
+    OPTIONAL2 = 5,
+    OPTIONAL3 = 6
 };
 
 struct City
@@ -181,7 +184,7 @@ public:
      * @return EXIT_FAILURE if heap overflow, EXIT_SUCCESS otherwise.
      */
     int max_heap_insert(City &node)
-    {        
+    {
     }
 
     /**
@@ -219,7 +222,7 @@ public:
      * @param newKey The new key value.
      */
     void heap_increase_key(unsigned int index, int newKey)
-    //might actually need to use a proper City instead of index here
+    // might actually need to use a proper City instead of index here
     {
         if (newKey < (*this)[index].population)
         {
@@ -391,10 +394,81 @@ int main(int argc, const char **argv)
 
     datasetFile.close();
 
-
     Heap heap(cities, cities.size());
 
     const string function = argv[FUNCTION];
+    const string childs_of_non_leaf_nodes = NULL;
+
+    switch (argc - 4)
+    {
+    case 1:
+        if (argv[OPTIONAL1][0] == 'd')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'i')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'k')
+        {
+        }
+        else
+        {
+            display_wrong_usage_message(argc, argv);
+        }
+
+        break;
+    case 2:
+        if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i')
+        {
+        }
+        else
+        {
+            display_wrong_usage_message(argc, argv);
+        }
+        break;
+    case 3:
+        if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'k')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'i')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'k')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'd')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'i')
+        {
+        }
+        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'd')
+        {
+        }
+        else
+        {
+            display_wrong_usage_message(argc, argv);
+        }
+        break;
+    default:
+        display_wrong_usage_message(argc, argv);
+        break;
+    }
 
     if (strcmp(function.c_str(), "max-heapify") == 0)
     {
@@ -475,6 +549,7 @@ inline int right(unsigned int i)
 void display_wrong_file_extension_message()
 {
     cerr << "Files for dataset and output should have the extension '.csv'." << endl;
+    cla_help();
 }
 
 void display_wrong_usage_message(int argc, const char **argv)
@@ -482,10 +557,10 @@ void display_wrong_usage_message(int argc, const char **argv)
     switch (argc)
     {
     case 1:
-        cerr << "Error: You need to specify commands before moving on. Use '--help' to view the available commands." << endl;
+        cerr << "Error: You need to specify commands before moving on." << endl;
         break;
     case 2:
-        cerr << "Error: Unknown argument: " << argv[1] << ". Use '--help' to view the available commands." << endl;
+        cerr << "Error: Unknown argument: " << argv[1] << "." << endl;
         break;
     default:
         cerr << "Error: Unknown arguments: ";
@@ -498,7 +573,8 @@ void display_wrong_usage_message(int argc, const char **argv)
             }
             else
             {
-                cerr << ". Use '--help' to view the available commands." << endl;
+                cerr << "." << endl;
+                cla_help();
             }
         }
     }

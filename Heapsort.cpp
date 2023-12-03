@@ -5,18 +5,19 @@
  * Name: Meriç Bağlayan
  * Id  : 150190056
  * Date: 2023-12-02
- * 
+ *
  * Non-functional messy code as it is in development.
  */
 
-#include <chrono>   // for measuring runtime
-#include <iostream> 
-#include <fstream>  // for reading csv files
-#include <sstream>  // for reading csv files
-#include <vector>   // for creating vectors
-#include <string.h> // for handling arguments
-#include <time.h>  
-#include <climits>  // for sentinel
+#include <chrono> // for measuring runtime
+#include <iostream>
+#include <fstream> // for reading csv files
+#include <sstream> // for reading csv files
+#include <vector>  // for creating vectors
+#include <string.h>
+#include <time.h>
+#include <climits> // for sentinel
+#include <cmath>
 
 using namespace std;
 
@@ -34,9 +35,13 @@ struct City
     int population;
 };
 
-//maybe i should create a heap class? investigate
-//the class should enforce the size strictly
+/**
+ * @brief Class that represents a heap.
+ *
+ * @attention NOT NECESSARILY A MAX-HEAP!
+ */
 class Heap
+// no clue what i'm doing
 {
 private:
     vector<City> array;
@@ -44,109 +49,222 @@ private:
     int d;
 
 public:
-    //getters, setters, functions
-    Heap(vector<City> &array, int size, int d)
+    int size()
     {
-        this->array = array;
-        this->size = size;
-        this->d = d;
+        return size;
+    }
+    int size(int i)
+    {
+        size = i;
+    }
+    int incrementSize()
+    {
+        size++;
+    }
+    int incrementSizeBy(int i)
+    {
+        size += i;
+    }
+
+    /**
+     * @brief Construct a new binary Heap object.
+     *
+     * @param array The array that will be used to create the heap.
+     * @param size The size of the array.
+     *
+     */
+    Heap(vector<City> &a, int n)
+    {
+        array = a;
+        size = n;
+        d = 2;
+    }
+    /**
+     * @brief Construct a new d-ary Heap object.
+     *
+     * @param a The array that will be used to create the heap.
+     * @param n The size of the array.
+     * @param k The number of children of non-leaf nodes.
+     */
+    Heap(vector<City> &a, int n, int k)
+    {
+        array = a;
+        size = n;
+        d = k;
+    }
+    /**
+     * @brief Overloaded [] operator to access the elements of the heap.
+     *        The index starts from 1.
+     *
+     * @param i The index of the element to be accessed.
+     * @return The element at index i.
+     * @throw `out_of_range` if i is out of range of the heap.
+     *
+     */
+    City &operator[](int i)
+    {
+        if (i >= 1 && i <= size)
+        {
+            return array[i - 1];
+        }
+        else
+        {
+            throw out_of_range("Index out of range of heap");
+        }
+    }
+
+    /**
+     * @brief Function that maintains the max-heap property.
+     *
+     * @param heap The heap object to be transformed into a max heap.
+     * @param i An index of the heap.
+     *          The function assumes that the subtrees rooted at left(i) and right(i) are max heaps,
+     *          but heap[i] might be smaller than its children, thus violating the max-heap property.
+     */
+    void max_heapify(Heap &heap, int i)
+    {
+        int l = left(i);
+        int r = right(i);
+        int largest = i;
+
+        // array.size() looks sketchy,
+        // class implementation might work better
+        if (l < heap.size && heap[l].population > heap[i].population)
+        {
+            largest = l;
+        }
+        else
+        {
+            largest = i;
+        }
+        if (r < heap.size && heap[r].population > heap[largest].population)
+        {
+            largest = r;
+        }
+        if (largest != i)
+        {
+            swap_elements(heap[i], heap[largest]);
+            max_heapify(heap, largest);
+        }
+    }
+
+    /**
+     * @brief Function that builds a max heap from a Heap object.
+     *
+     * @param heap The Heap object to be transformed into a max heap.
+     */
+    void build_max_heap(Heap &heap)
+    {
+        for (int i = heap.size >> 1; i >= 1; i--)
+        {
+            heap.max_heapify(heap, i);
+        }
+    }
+
+    /**
+     * @brief Function that sorts a Heap object using heapsort.
+     *
+     * @param heap The Heap object to be sorted.
+     */
+    void heapsort(Heap &heap)
+    {
+        build_max_heap(heap);
+        for (int i = heap.size; i >= 1; i--)
+        {
+            swap_elements(heap[0], heap[i]);
+            heap.max_heapify(heap, 0);
+        }
+    }
+
+    /**
+     * @brief Function that inserts a node into a Heap object.
+     *
+     * @param heap The Heap object which the node will be inserted into.
+     * @param node The node to be inserted.
+     *
+     * @return EXIT_FAILURE if heap overflow, EXIT_SUCCESS otherwise.
+     */
+    int max_heap_insert(Heap &heap, City &node)
+    {
+    }
+
+    /**
+     * @brief Function that removes and returns the maximum element of a Heap object.
+     *
+     * @param heap The Heap object which the maximum element will be extracted from.
+     * @return The maximum element of the Heap object.
+     */
+    City heap_extract_max(Heap &heap)
+    {
+    }
+
+    /**
+     * @brief Function that increases the key of a node in a Heap object.
+     *
+     * @param heap The Heap object which the node is in.
+     * @param node The node whose key will be increased.
+     * @param newKey The new key value.
+     */
+    void heap_increase_key(Heap &heap, City &node, int newKey)
+    {
+    }
+
+    /**
+     * @brief Function that returns the maximum element of a Heap object.
+     *
+     * @param heap The Heap object which the maximum element will be returned from.
+     * @return The maximum element of the Heap object.
+     */
+    City heap_maximum(Heap &heap)
+    {
+    }
+
+    /**
+     * @brief Function that calculates the height of a d-ary Heap object.
+     *
+     * @param heap The Heap object which the height will be calculated from.
+     * @param d The number of children of non-leaf nodes.
+     *
+     * @return The height of the d-ary Heap object.
+     */
+    int dary_calculate_height(Heap &heap, int d)
+    {
+    }
+
+    /**
+     * @brief Function that removes and returns the maximum element of a d-ary Heap object.
+     *
+     * @param heap The Heap object which the maximum element will be extracted from.
+     */
+    City dary_extract_max(Heap &heap)
+    {
+    }
+
+    /**
+     * @brief Function that inserts a node into a d-ary Heap object.
+     *
+     * @param heap The Heap object which the node will be inserted into.
+     * @param node The node to be inserted.
+     * @param d The number of children of non-leaf nodes.
+     */
+    void dary_insert_element(Heap &heap, City &node, int d)
+    {
+    }
+
+    /**
+     * @brief Function that increases the key of a node in a d-ary Heap object.
+     *
+     * @param heap The Heap object which the node is in.
+     * @param node The node whose key will be increased.
+     * @param newKey The new key value.
+     * @param d The number of children of non-leaf nodes.
+     */
+    void dary_increase_key(Heap &heap, City &node, int newKey, int d)
+    {
     }
 };
 
 #pragma region Function declarations
-
-/**
- * @brief Function that maintains the max-heap property.
- *
- * @param array The vector to be transformed into a max heap.
- * @param i An index of the vector.
- *          The function assumes that the subtrees rooted at left(i) and right(i) are max heaps,
- *          but array[i] might be smaller than its children, thus violating the max-heap property.
- */
-void max_heapify(vector<City> &array, int i);
-
-/**
- * @brief Function that builds a max heap from a vector.
- *
- * @param array The vector to be transformed into a max heap.
- * @param length The length of the vector.
- */
-void build_max_heap(vector<City> &array, int length);
-
-/**
- * @brief Function that sorts a vector using heapsort.
- *
- * @param array The vector to be sorted.
- * @param length The length of the vector.
- */
-void heapsort(vector<City> &array, int length);
-
-/**
- * @brief Function that inserts a node into a max heap.
- *
- * @param array The vector which the node will be inserted into.
- * @param node The node to be inserted.
- * @param size The size of the vector.
- * 
- * @return EXIT_FAILURE if heap overflow, EXIT_SUCCESS otherwise.
- */
-int max_heap_insert(vector<City> &array, City &node, int size);
-
-/**
- * @brief Function that removes and returns the maximum element of a max heap.
- *
- * @param array The vector which the maximum element will be extracted from.
- * @return The maximum element of the max heap.
- */
-City heap_extract_max(vector<City> &array);
-
-/**
- * @brief Function that increases the key of a node.
- *
- * @param array The vector which the node is in.
- * @param node The node whose key will be increased.
- * @param newKey The new key value.
- */
-void heap_increase_key(vector<City> &array, City &node, int newKey);
-
-/**
- * @brief Function that returns the maximum element of a max heap.
- *
- * @param array The vector which the maximum element will be returned from.
- * @return The maximum element of the max heap.
- */
-City heap_maximum(vector<City> &array);
-
-void dary_array_representation(); // not sure what this is supposed to do
-
-void dary_calculate_height(vector<City> &array, int size, int d); // takes log base d of n
-
-/**
- * @brief Function that removes and returns the maximum element of a d-ary max heap.
- *
- * @param array The vector which the maximum element will be extracted from.
- */
-City dary_extract_max(vector<City> &array);
-
-/**
- * @brief Function that inserts a node into a d-ary max heap.
- *
- * @param array The vector which the node will be inserted into.
- * @param node The node to be inserted.
- * @param size The size of the vector.
- * @param d The number of children of non-leaf nodes.
- */
-void dary_insert_element(vector<City> &array, City &node, int size, int d);
-
-/**
- * @brief Function that increases the key of a node in a d-ary max heap.
- *
- * @param array The vector which the node is in.
- * @param node The node whose key will be increased.
- * @param newKey The new key value.
- * @param d The number of children of non-leaf nodes.
- */
-void dary_increase_key(vector<City> &array, City &node, int newKey, int d);
 
 inline void swap_elements(City &c1, City &c2);
 inline int parent(int i);
@@ -260,7 +378,7 @@ int main(int argc, const char **argv)
     return EXIT_SUCCESS;
 }
 
-#pragma region Sorting functions
+#pragma region Sorting helper functions
 inline void swap_elements(City &c1, City &c2)
 {
     City temp = c1;
@@ -281,51 +399,6 @@ inline int left(int i)
 inline int right(int i)
 {
     return (i << 1) + 1;
-}
-
-void max_heapify(vector<City> &array, int i)
-{
-    int l = left(i);
-    int r = right(i);
-    int largest = i;
-
-    //array.size() looks sketchy,
-    //class implementation might work better
-    if (l < array.size() && array[l].population > array[i].population)
-    {
-        largest = l;
-    }
-    else
-    {
-        largest = i;
-    }
-    if (r < array.size() && array[r].population > array[largest].population)
-    {
-        largest = r;
-    }
-    if (largest != i)
-    {
-        swap_elements(array[i], array[largest]);
-        max_heapify(array, largest);
-    }
-}
-
-void build_max_heap(vector<City> &array, int length)
-{
-    for (int i = length >> 1; i >= 0; i--)
-    {
-        max_heapify(array, i);
-    }
-}
-
-void heapsort(vector<City> &array, int length)
-{
-    build_max_heap(array, length);
-    for (int i = length - 1; i >= 0; i--)
-    {
-        swap_elements(array[0], array[i]);
-        max_heapify(array, 0);
-    }
 }
 #pragma endregion
 
@@ -370,30 +443,28 @@ void display_time_elapsed(char strategy, int threshold, auto time)
 
 void cla_help()
 {
-    // not entirely sure about the optional parameters
-    cout << "Usage: ./Heapsort <DATASET-FILE-NAME>.csv <FUNCTION-NAME> <OUTPUT-FILE-NAME>.csv ([d<#>] | [i<#>] [k<#>])" << endl;
-    cout << "Options:" << endl;
-    cout << "  <DATASET-FILE-NAME>.csv:  The name of the dataset file. Must be a .csv file with semicolon as the delimiter." << endl;
-    cout << "  <FUNCTION-NAME>:  The name of the function to be used. Must be one of the following:" << endl;
-    cout << "    - max_heapify" << endl;
-    cout << "    - build_max_heap" << endl;
-    cout << "    - heapsort" << endl;
-    cout << "    - max_heap_insert" << endl;
-    cout << "    - heap_extract_max" << endl;
-    cout << "    - heap_increase_key" << endl;
-    cout << "    - heap_maximum" << endl;
-    cout << "    - dary_array_representation" << endl;
-    cout << "    - dary_calculate_height" << endl;
-    cout << "    - dary_extract_max" << endl;
-    cout << "    - dary_insert_element" << endl;
-    cout << "    - dary_increase_key" << endl;
-    cout << "  <OUTPUT-FILE-NAME>.csv:  The name of the output file. Must be a .csv file with semicolon as the delimiter." << endl;
-    cout << "  [d<#>]:  Optional parameter to specify the number of children of non-leaf nodes. Example use: d5." << endl;
-    cout << "  [i<#>]:  Optional parameter to specify the index of a node." << endl;
-    cout << "  [k<#>]:  Optional parameter to specify the key value to update an element. Must be used with i" << endl;
-    cout << "  i and k together are available only for the following functions:" << endl;
-    cout << "    - heap_increase_key" << endl;
-    cout << "    - dary_increase_key" << endl;
+    cout << "Usage: ./Heapsort <DATASET-FILE-NAME>.csv <FUNCTION-NAME> <OUTPUT-FILE-NAME>.csv ([d<#>] | [i<#>] [k<#>])\n"
+         << "Options:\n"
+         << "  <DATASET-FILE-NAME>.csv:  The name of the dataset file. Must be a .csv file with semicolon as the delimiter.\n"
+         << "  <FUNCTION-NAME>:  The name of the function to be used. Must be one of the following:\n"
+         << "    - max_heapify\n"
+         << "    - build_max_heap\n"
+         << "    - heapsort\n"
+         << "    - max_heap_insert\n"
+         << "    - heap_extract_max\n"
+         << "    - heap_increase_key\n"
+         << "    - heap_maximum\n"
+         << "    - dary_calculate_height\n"
+         << "    - dary_extract_max\n"
+         << "    - dary_insert_element\n"
+         << "    - dary_increase_key\n"
+         << "  <OUTPUT-FILE-NAME>.csv:  The name of the output file. Must be a .csv file with semicolon as the delimiter.\n"
+         << "  [d<#>]:  Optional parameter to specify the number of children of non-leaf nodes. Example use: d5.\n"
+         << "  [i<#>]:  Optional parameter to specify the index of a node.\n"
+         << "  [k<#>]:  Optional parameter to specify the key value to update an element. Must be used with i\n"
+         << "  i and k together are available only for the following functions:\n"
+         << "    - heap_increase_key\n"
+         << "    - dary_increase_key" << endl;
 }
 
 void cla_version()

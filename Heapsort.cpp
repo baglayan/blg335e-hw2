@@ -470,37 +470,37 @@ int main(int argc, const char **argv)
         break;
     }
 
-    if (strcmp(function.c_str(), "max-heapify") == 0)
+    if (strcmp(function.c_str(), "max_heapify") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "build-max-heap") == 0)
+    else if (strcmp(function.c_str(), "build_max_heap") == 0)
     {
     }
     else if (strcmp(function.c_str(), "heapsort") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "max-heap-insert") == 0)
+    else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "heap-extract-max") == 0)
+    else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "heap-increase-key") == 0)
+    else if (strcmp(function.c_str(), "heap_increase_key") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "heap-maximum") == 0)
+    else if (strcmp(function.c_str(), "heap_maximum") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "dary-calculate-height") == 0)
+    else if (strcmp(function.c_str(), "dary_calculate_height") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "dary-extract-max") == 0)
+    else if (strcmp(function.c_str(), "dary_extract_max") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "dary-insert-element") == 0)
+    else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
     }
-    else if (strcmp(function.c_str(), "dary-increase-key") == 0)
+    else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
     }
     else

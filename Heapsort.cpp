@@ -239,11 +239,9 @@ public:
     /**
      * @brief Function that calculates the height of a d-ary Heap object.
      *
-     * @param d The number of children of non-leaf nodes.
-     *
      * @return The height of the d-ary Heap object.
      */
-    int dary_calculate_height(unsigned int d)
+    int dary_calculate_height()
     {
     }
 
@@ -259,20 +257,18 @@ public:
      * @brief Function that inserts a node into a d-ary Heap object.
      *
      * @param node The node to be inserted.
-     * @param d The number of children of non-leaf nodes.
      */
-    void dary_insert_element(City &node, unsigned int d)
+    void dary_insert_element(City &node)
     {
     }
 
     /**
      * @brief Function that increases the key of a node in a d-ary Heap object.
      *
-     * @param node The node whose key will be increased.
+     * @param index The index of the node whose key will be increased.
      * @param newKey The new key value.
-     * @param d The number of children of non-leaf nodes.
      */
-    void dary_increase_key(City &node, int newKey, unsigned int d)
+    void dary_increase_key(unsigned int index, int newKey)
     {
     }
 
@@ -287,10 +283,17 @@ public:
 
 #pragma region Function declarations
 
+/**
+ * @brief 
+ * 
+ * @param c1 
+ * @param c2 
+ */
 inline void swap_elements(City &c1, City &c2);
 inline int parent(unsigned int i);
 inline int left(unsigned int i);
 inline int right(unsigned int i);
+size_t extract_number_from_arg(const char *arg);
 
 void display_time_elapsed(char strategy, int threshold, auto time);
 
@@ -394,22 +397,29 @@ int main(int argc, const char **argv)
 
     datasetFile.close();
 
-    Heap heap(cities, cities.size());
-
     const string function = argv[FUNCTION];
-    const string childs_of_non_leaf_nodes = NULL;
+    unsigned int childrenOfNonLeafNodes;
+    size_t indexToOperate;
+    int keyToOperate;
 
     switch (argc - 4)
     {
+    case 0:
+        childrenOfNonLeafNodes = 2;
+        indexToOperate = NULL;
+        keyToOperate = NULL;
     case 1:
         if (argv[OPTIONAL1][0] == 'd')
         {
+            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else if (argv[OPTIONAL1][0] == 'i')
         {
+            indexToOperate = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else if (argv[OPTIONAL1][0] == 'k')
         {
+            keyToOperate = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else
         {
@@ -420,21 +430,18 @@ int main(int argc, const char **argv)
     case 2:
         if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i')
         {
-        }
-        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd')
-        {
+            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
+            indexToOperate = extract_number_from_arg(argv[OPTIONAL2]);
         }
         else if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k')
         {
-        }
-        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd')
-        {
+            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
+            keyToOperate = extract_number_from_arg(argv[OPTIONAL2]);
         }
         else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k')
         {
-        }
-        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i')
-        {
+            indexToOperate = extract_number_from_arg(argv[OPTIONAL1]);
+            keyToOperate = extract_number_from_arg(argv[OPTIONAL2]);
         }
         else
         {
@@ -444,21 +451,9 @@ int main(int argc, const char **argv)
     case 3:
         if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'k')
         {
-        }
-        else if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'i')
-        {
-        }
-        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'k')
-        {
-        }
-        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'd')
-        {
-        }
-        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'i')
-        {
-        }
-        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'd')
-        {
+            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
+            indexToOperate = extract_number_from_arg(argv[OPTIONAL2]);
+            keyToOperate = extract_number_from_arg(argv[OPTIONAL3]);
         }
         else
         {
@@ -470,38 +465,52 @@ int main(int argc, const char **argv)
         break;
     }
 
+    size_t vectorSize = cities.size();
+    Heap heap(cities, cities.size(), childrenOfNonLeafNodes);
+
     if (strcmp(function.c_str(), "max_heapify") == 0)
     {
+        heap.max_heapify(vectorSize);
     }
     else if (strcmp(function.c_str(), "build_max_heap") == 0)
     {
+        heap.build_max_heap(vectorSize);
     }
     else if (strcmp(function.c_str(), "heapsort") == 0)
     {
+        heap.heapsort(vectorSize);
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
+        //?
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
+        heap.heap_extract_max();
     }
     else if (strcmp(function.c_str(), "heap_increase_key") == 0)
     {
+        heap.heap_increase_key(indexToOperate, keyToOperate);
     }
     else if (strcmp(function.c_str(), "heap_maximum") == 0)
     {
+        heap.heap_maximum();
     }
     else if (strcmp(function.c_str(), "dary_calculate_height") == 0)
     {
+        heap.dary_calculate_height();
     }
     else if (strcmp(function.c_str(), "dary_extract_max") == 0)
     {
+        heap.dary_extract_max();
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
+        //?
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
+        heap.dary_increase_key(indexToOperate, keyToOperate);
     }
     else
     {
@@ -546,6 +555,11 @@ inline int right(unsigned int i)
 #pragma endregion
 
 #pragma region Command line argument handler functions
+size_t extract_number_from_arg(const char *arg)
+{
+    return stoi(++arg);
+}
+
 void display_wrong_file_extension_message()
 {
     cerr << "Files for dataset and output should have the extension '.csv'." << endl;

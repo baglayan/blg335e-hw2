@@ -9,13 +9,13 @@
  * Non-functional messy code as it is in development.
  */
 
-#include <chrono> // for measuring runtime
 #include <iostream>
+#include <string.h>
+#include <time.h>
+#include <chrono>  // for measuring runtime
 #include <fstream> // for reading csv files
 #include <sstream> // for reading csv files
 #include <vector>  // for creating vectors
-#include <string.h>
-#include <time.h>
 #include <climits> // for sentinel
 #include <cmath>
 
@@ -38,13 +38,85 @@ struct City
     int population;
 };
 
+#pragma region Function declarations
+
+/**
+ * @brief Function to swap two elements.
+ *
+ * @param c1 The first element.
+ * @param c2 The second element.
+ */
+inline void swap_elements(City &c1, City &c2);
+
+/**
+ * @brief Function to calculate the hypothetical parent index of an index.
+ *
+ * @param i The index whose parent index will be calculated.
+ * @return int The hypothetical parent index of i.
+ */
+inline int parent(unsigned int i);
+
+/**
+ * @brief Function to calculate the hypothetical left child index of an index.
+ *
+ * @param i The index whose left child index will be calculated.
+ * @return int The hypothetical left child index of i.
+ */
+inline int left(unsigned int i);
+
+/**
+ * @brief Function to calculate the hypothetical right child index of an index.
+ *
+ * @param i The index whose right child index will be calculated.
+ * @return int The hypothetical right child index of i.
+ */
+inline int right(unsigned int i);
+
+/**
+ * @brief Extracts the number from the optional arguments such as "d3".
+ *
+ * @param arg The optional argument from which the number will be extracted.
+ * @return size_t The number extracted from the optional argument.
+ */
+size_t extract_number_from_arg(const char *arg);
+
+/**
+ * @brief Function to display the time elapsed.
+ *
+ * @param time The time elapsed.
+ */
+void display_time_elapsed(auto time, const string function);
+
+/**
+ * @brief Function to display the wrong usage message.
+ *
+ * @param argc Number of command line arguments.
+ * @param argv Array of command line arguments.
+ */
+void display_wrong_usage_message(int argc, const char **argv);
+
+/**
+ * @brief Function to display the wrong file extension message.
+ */
+void display_wrong_file_extension_message();
+
+/**
+ * @brief Function to display the help message.
+ */
+void cla_help();
+
+/**
+ * @brief Function to display the version message.
+ */
+void cla_version();
+#pragma endregion
+
 /**
  * @brief Class that represents a heap.
  *
  * @attention NOT NECESSARILY A MAX-HEAP!
  */
 class Heap
-// no clue what i'm doing
 {
 private:
     vector<City> array;
@@ -52,22 +124,6 @@ private:
     unsigned int d;
 
 public:
-    size_t size()
-    {
-        return size;
-    }
-    size_t size(int i)
-    {
-        size = i;
-    }
-    void incrementSize()
-    {
-        size++;
-    }
-    void incrementSizeBy(int i)
-    {
-        size += i;
-    }
     /**
      * @brief Overloaded [] operator to access the elements of the heap.
      *        The index starts from 1.
@@ -102,6 +158,15 @@ public:
         size = n;
         d = 2;
     }
+
+    /**
+     * @brief Destroy the Heap object
+     *
+     */
+    ~Heap()
+    {
+        array.clear();
+    }
     /**
      * @brief Construct a new d-ary Heap object.
      *
@@ -127,7 +192,7 @@ public:
     {
         int l = left(i);
         int r = right(i);
-        int largest = i;
+        int largest;
 
         if (l <= this->size && (*this)[l].population > (*this)[i].population)
         {
@@ -172,6 +237,7 @@ public:
         for (size_t i = n; i >= 2; i--)
         {
             swap_elements((*this)[1], (*this)[i]);
+            size--;
             this->max_heapify(1);
         }
     }
@@ -243,6 +309,7 @@ public:
      */
     int dary_calculate_height()
     {
+        return ceil(log(size * d - size + 1) / log(this->d)) - 1;
     }
 
     /**
@@ -272,8 +339,9 @@ public:
     {
     }
 
-    void print_to_output_file(ofstream &outputFile)
+    void print_to_output_file(ofstream &outputFile, size_t n)
     {
+        size = n;
         for (size_t i = 1; i <= size; i++)
         {
             outputFile << (*this)[i].name << ";" << (*this)[i].population << endl;
@@ -281,45 +349,17 @@ public:
     }
 };
 
-#pragma region Function declarations
 
 /**
- * @brief 
- * 
- * @param c1 
- * @param c2 
- */
-inline void swap_elements(City &c1, City &c2);
-inline int parent(unsigned int i);
-inline int left(unsigned int i);
-inline int right(unsigned int i);
-size_t extract_number_from_arg(const char *arg);
-
-void display_time_elapsed(char strategy, int threshold, auto time);
-
-/**
- * @brief Function to display the wrong usage message.
+ * @brief Function to execute a function and measure its runtime.
  *
- * @param argc Number of command line arguments.
- * @param argv Array of command line arguments.
+ * @param heap The heap object on which the function will be executed.
+ * @param func The function to be executed.
+ * @param functionName The name of the function to be executed.
+ * @param args The arguments of the function to be executed.
  */
-void display_wrong_usage_message(int argc, const char **argv);
-
-/**
- * @brief Function to display the wrong file extension message.
- */
-void display_wrong_file_extension_message();
-
-/**
- * @brief Function to display the help message.
- */
-void cla_help();
-
-/**
- * @brief Function to display the version message.
- */
-void cla_version();
-#pragma endregion
+template <typename Func, typename... Args>
+void execute_and_measure(Heap &heap, Func func, const string &functionName, Args... args);
 
 /**
  * @brief Main driver function.
@@ -406,8 +446,9 @@ int main(int argc, const char **argv)
     {
     case 0:
         childrenOfNonLeafNodes = 2;
-        indexToOperate = NULL;
-        keyToOperate = NULL;
+        indexToOperate = 0;
+        keyToOperate = 0;
+        break;
     case 1:
         if (argv[OPTIONAL1][0] == 'd')
         {
@@ -425,7 +466,6 @@ int main(int argc, const char **argv)
         {
             display_wrong_usage_message(argc, argv);
         }
-
         break;
     case 2:
         if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i')
@@ -470,47 +510,48 @@ int main(int argc, const char **argv)
 
     if (strcmp(function.c_str(), "max_heapify") == 0)
     {
-        heap.max_heapify(vectorSize);
+        size_t floor_size_over_two = vectorSize >> 1;
+        execute_and_measure(heap, &Heap::max_heapify, "max_heapify", floor_size_over_two);
     }
     else if (strcmp(function.c_str(), "build_max_heap") == 0)
     {
-        heap.build_max_heap(vectorSize);
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
     }
     else if (strcmp(function.c_str(), "heapsort") == 0)
     {
-        heap.heapsort(vectorSize);
+        execute_and_measure(heap, &Heap::heapsort, "heapsort", vectorSize);
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
-        //?
+        //execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", indexToOperate, keyToOperate);
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
-        heap.heap_extract_max();
+        execute_and_measure(heap, &Heap::heap_extract_max, "heap_extract_max");
     }
     else if (strcmp(function.c_str(), "heap_increase_key") == 0)
     {
-        heap.heap_increase_key(indexToOperate, keyToOperate);
+        execute_and_measure(heap, &Heap::heap_increase_key, "heap_increase_key", indexToOperate, keyToOperate);
     }
     else if (strcmp(function.c_str(), "heap_maximum") == 0)
     {
-        heap.heap_maximum();
+        execute_and_measure(heap, &Heap::heap_maximum, "heap_maximum");
     }
     else if (strcmp(function.c_str(), "dary_calculate_height") == 0)
     {
-        heap.dary_calculate_height();
+        execute_and_measure(heap, &Heap::dary_calculate_height, "dary_calculate_height");
     }
     else if (strcmp(function.c_str(), "dary_extract_max") == 0)
     {
-        heap.dary_extract_max();
+        execute_and_measure(heap, &Heap::dary_extract_max, "dary_extract_max");
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
-        //?
+        //execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", indexToOperate, keyToOperate);
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
-        heap.dary_increase_key(indexToOperate, keyToOperate);
+        execute_and_measure(heap, &Heap::dary_increase_key, "dary_increase_key", indexToOperate, keyToOperate);
     }
     else
     {
@@ -524,7 +565,7 @@ int main(int argc, const char **argv)
         cerr << "Could not open the output file " << outputName << "." << endl;
         return EXIT_FAILURE;
     }
-    heap.print_to_output_file(outputFile);
+    heap.print_to_output_file(outputFile, vectorSize);
     outputFile.close();
 
     return EXIT_SUCCESS;
@@ -594,9 +635,20 @@ void display_wrong_usage_message(int argc, const char **argv)
     }
 }
 
-void display_time_elapsed(auto time)
+template <typename Func, typename... Args>
+void execute_and_measure(Heap &heap, Func func, const string &functionName, Args... args)
 {
-    cout << "Time taken by Heapsort: "
+    auto start = chrono::high_resolution_clock::now();
+    (heap.*func)(args...);
+    auto end = chrono::high_resolution_clock::now();
+    auto timeElapsed = chrono::duration_cast<chrono::nanoseconds>(end - start);
+
+    display_time_elapsed(timeElapsed.count(), functionName);
+}
+
+void display_time_elapsed(auto time, const string function)
+{
+    cout << "Time taken by " << function << ": "
          << time << " ns." << endl;
 }
 

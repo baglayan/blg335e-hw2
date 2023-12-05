@@ -21,6 +21,43 @@
 
 using namespace std;
 
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ * DO
+ *
+ * NOT
+ *
+ * FORGET
+ *
+ * TO
+ *
+ * UPDATE
+ *
+ * FOR
+ *
+ * CITY
+ *
+ * NAME
+ *
+ * ARGUMENT
+ *
+ * FOR
+ *
+ * INSERT
+ *
+ * OPERATIONS
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 enum Args
 {
     EXECUTABLE = 0,
@@ -49,12 +86,32 @@ struct City
 inline void swap_elements(City &c1, City &c2);
 
 /**
+ * @brief Returns the index of the parent of an index in a d-ary heap.
+ *
+ * @param i The index whose parent index will be calculated.
+ * @param d Number of children of non-leaf nodes.
+ * @return The parent index of i.
+ */
+inline size_t dary_parent(size_t i, unsigned int d);
+
+/**
+ * @brief Returns the index of k-th child of an index in a d-ary heap.
+ *
+ * @param i The index whose child index will be calculated.
+ * @param d Number of children of non-leaf nodes.
+ * @param k The k-th child of i.
+ *
+ * @return The index of k-th child of i.
+ */
+inline size_t dary_child(size_t i, unsigned int d, unsigned int k);
+
+/**
  * @brief Function to calculate the hypothetical parent index of an index.
  *
  * @param i The index whose parent index will be calculated.
  * @return int The hypothetical parent index of i.
  */
-inline size_t parent(unsigned int i);
+inline size_t parent(size_t i);
 
 /**
  * @brief Function to calculate the hypothetical left child index of an index.
@@ -62,7 +119,7 @@ inline size_t parent(unsigned int i);
  * @param i The index whose left child index will be calculated.
  * @return int The hypothetical left child index of i.
  */
-inline size_t left(unsigned int i);
+inline size_t left(size_t i);
 
 /**
  * @brief Function to calculate the hypothetical right child index of an index.
@@ -70,7 +127,7 @@ inline size_t left(unsigned int i);
  * @param i The index whose right child index will be calculated.
  * @return int The hypothetical right child index of i.
  */
-inline size_t right(unsigned int i);
+inline size_t right(size_t i);
 
 /**
  * @brief Extracts the number from the optional arguments such as "d3".
@@ -78,12 +135,21 @@ inline size_t right(unsigned int i);
  * @param arg The optional argument from which the number will be extracted.
  * @return size_t The number extracted from the optional argument.
  */
-size_t extract_number_from_arg(const char *arg);
+const size_t extract_number_from_arg(const char *arg);
+
+/**
+ * @brief Extracts the name from the optional arguments such as "nBursa".
+ *
+ * @param arg The optional argument from which the number will be extracted.
+ * @return The name extracted from the optional argument.
+ */
+const char *extract_name_from_arg(const char *arg);
 
 /**
  * @brief Function to display the time elapsed.
  *
  * @param time The time elapsed.
+ * @param function The name of the function that was executed.
  */
 void display_time_elapsed(auto time, const string function);
 
@@ -215,8 +281,9 @@ public:
     }
 
     /**
-     * @brief Function that builds a max heap from a Heap object.
+     * @brief Function that builds a max heap from the heap.
      *
+     * @param n Size of the heap.
      */
     void build_max_heap(size_t n)
     {
@@ -224,21 +291,6 @@ public:
         for (int i = n >> 1; i >= 1; i--)
         {
             max_heapify(i);
-        }
-    }
-
-    /**
-     * @brief Function that sorts a Heap object using heapsort.
-     *
-     */
-    void heapsort(size_t n)
-    {
-        this->build_max_heap(n);
-        for (size_t i = n; i >= 2; i--)
-        {
-            swap_elements((*this)[1], (*this)[i]);
-            size--;
-            this->max_heapify(1);
         }
     }
 
@@ -303,6 +355,46 @@ public:
     }
 
     /**
+     * @brief Function that maintains the max-heap property for a d-ary heap.
+     *
+     * @param i An index of the heap.
+     */
+    void dary_max_heapify(size_t i)
+    {
+        size_t largest = i;
+
+        for (size_t child = d * (i - 1) + 2;
+             child <= d * (i - 1) + d + 1;
+             child++)
+        {
+            if (child <= this->size && (*this)[child].population > (*this)[largest].population)
+            {
+                largest = child;
+            }
+        }
+
+        if (largest != i)
+        {
+            swap_elements((*this)[i], (*this)[largest]);
+            this->dary_max_heapify(largest);
+        }
+    }
+
+    /**
+     * @brief
+     *
+     * @param n
+     */
+    void dary_build_max_heap(size_t n)
+    {
+        size = n;
+        for (int i = floor((n - 2) / d + 1); i >= 1; i--)
+        {
+            dary_max_heapify(i);
+        }
+    }
+
+    /**
      * @brief Function that calculates the height of a d-ary Heap object.
      *
      * @return The height of the d-ary Heap object.
@@ -337,6 +429,32 @@ public:
      */
     void dary_increase_key(unsigned int index, int newKey)
     {
+    }
+
+    /**
+     * @brief Function that sorts a Heap object using heapsort.
+     *
+     */
+    void heapsort(size_t n)
+    {
+        this->build_max_heap(n);
+        for (size_t i = n; i >= 2; i--)
+        {
+            swap_elements((*this)[1], (*this)[i]);
+            size--;
+            this->max_heapify(1);
+        }
+    };
+
+    void dary_heapsort(size_t n)
+    {
+        this->dary_build_max_heap(n);
+        for (size_t i = n; i >= 2; i--)
+        {
+            swap_elements((*this)[1], (*this)[i]);
+            size--;
+            this->dary_max_heapify(1);
+        }
     }
 
     void print_to_output_file(ofstream &outputFile, size_t n)
@@ -437,29 +555,29 @@ int main(int argc, const char **argv)
     datasetFile.close();
 
     const string function = argv[FUNCTION];
-    unsigned int childrenOfNonLeafNodes;
-    size_t indexToOperate;
-    int keyToOperate;
+    unsigned int argD;
+    size_t argI;
+    int argK;
 
     switch (argc - 4)
     {
     case 0:
-        childrenOfNonLeafNodes = 2;
-        indexToOperate = 0;
-        keyToOperate = 0;
+        argD = 2;
+        argI = 0;
+        argK = 0;
         break;
     case 1:
         if (argv[OPTIONAL1][0] == 'd')
         {
-            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
+            argD = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else if (argv[OPTIONAL1][0] == 'i')
         {
-            indexToOperate = extract_number_from_arg(argv[OPTIONAL1]);
+            argI = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else if (argv[OPTIONAL1][0] == 'k')
         {
-            keyToOperate = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else
         {
@@ -469,18 +587,33 @@ int main(int argc, const char **argv)
     case 2:
         if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i')
         {
-            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
-            indexToOperate = extract_number_from_arg(argv[OPTIONAL2]);
+            argD = extract_number_from_arg(argv[OPTIONAL1]);
+            argI = extract_number_from_arg(argv[OPTIONAL2]);
+        }
+        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd')
+        {
+            argD = extract_number_from_arg(argv[OPTIONAL2]);
+            argI = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k')
         {
-            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
-            keyToOperate = extract_number_from_arg(argv[OPTIONAL2]);
+            argD = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_number_from_arg(argv[OPTIONAL2]);
+        }
+        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd')
+        {
+            argD = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k')
         {
-            indexToOperate = extract_number_from_arg(argv[OPTIONAL1]);
-            keyToOperate = extract_number_from_arg(argv[OPTIONAL2]);
+            argI = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_number_from_arg(argv[OPTIONAL2]);
+        }
+        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i')
+        {
+            argI = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else
         {
@@ -490,9 +623,39 @@ int main(int argc, const char **argv)
     case 3:
         if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'k')
         {
-            childrenOfNonLeafNodes = extract_number_from_arg(argv[OPTIONAL1]);
-            indexToOperate = extract_number_from_arg(argv[OPTIONAL2]);
-            keyToOperate = extract_number_from_arg(argv[OPTIONAL3]);
+            argD = extract_number_from_arg(argv[OPTIONAL1]);
+            argI = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_number_from_arg(argv[OPTIONAL3]);
+        }
+        if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'i')
+        {
+            argD = extract_number_from_arg(argv[OPTIONAL1]);
+            argI = extract_number_from_arg(argv[OPTIONAL3]);
+            argK = extract_number_from_arg(argv[OPTIONAL2]);
+        }
+        if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'k')
+        {
+            argD = extract_number_from_arg(argv[OPTIONAL2]);
+            argI = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_number_from_arg(argv[OPTIONAL3]);
+        }
+        if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'd')
+        {
+            argD = extract_number_from_arg(argv[OPTIONAL3]);
+            argI = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_number_from_arg(argv[OPTIONAL2]);
+        }
+        if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'i')
+        {
+            argD = extract_number_from_arg(argv[OPTIONAL2]);
+            argI = extract_number_from_arg(argv[OPTIONAL3]);
+            argK = extract_number_from_arg(argv[OPTIONAL1]);
+        }
+        if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'd')
+        {
+            argD = extract_number_from_arg(argv[OPTIONAL3]);
+            argI = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_number_from_arg(argv[OPTIONAL1]);
         }
         else
         {
@@ -505,7 +668,7 @@ int main(int argc, const char **argv)
     }
 
     size_t vectorSize = cities.size();
-    Heap heap(cities, cities.size(), childrenOfNonLeafNodes);
+    Heap heap(cities, cities.size(), argD);
 
     if (strcmp(function.c_str(), "max_heapify") == 0)
     {
@@ -518,11 +681,19 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "heapsort") == 0)
     {
-        execute_and_measure(heap, &Heap::heapsort, "heapsort", vectorSize);
+        switch (argD)
+        {
+        case 2:
+            execute_and_measure(heap, &Heap::dary_heapsort, "heapsort", vectorSize);
+            break;
+        default:
+            execute_and_measure(heap, &Heap::dary_heapsort, "heapsort", vectorSize);
+            break;
+        }
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
-        // execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", indexToOperate, keyToOperate);
+        // execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", argI, argK);
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
@@ -530,7 +701,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "heap_increase_key") == 0)
     {
-        execute_and_measure(heap, &Heap::heap_increase_key, "heap_increase_key", indexToOperate, keyToOperate);
+        execute_and_measure(heap, &Heap::heap_increase_key, "heap_increase_key", argI, argK);
     }
     else if (strcmp(function.c_str(), "heap_maximum") == 0)
     {
@@ -546,11 +717,11 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
-        // execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", indexToOperate, keyToOperate);
+        // execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", argI, argK);
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
-        execute_and_measure(heap, &Heap::dary_increase_key, "dary_increase_key", indexToOperate, keyToOperate);
+        execute_and_measure(heap, &Heap::dary_increase_key, "dary_increase_key", argI, argK);
     }
     else
     {
@@ -578,26 +749,42 @@ inline void swap_elements(City &c1, City &c2)
     c2 = temp;
 }
 
-inline size_t parent(unsigned int i)
+inline size_t dary_parent(size_t i, unsigned int d)
+{
+    return floor((i - 2) / d + 1);
+}
+
+inline size_t dary_child(size_t i, unsigned int d, unsigned int k)
+{
+    return d * (i - 1) + k + 1;
+}
+
+inline size_t parent(size_t i)
 {
     return i >> 1;
 }
 
-inline size_t left(unsigned int i)
+inline size_t left(size_t i)
 {
     return i << 1;
 }
 
-inline size_t right(unsigned int i)
+inline size_t right(size_t i)
 {
     return (i << 1) + 1;
 }
+
 #pragma endregion
 
 #pragma region Command line argument handler functions
-size_t extract_number_from_arg(const char *arg)
+const size_t extract_number_from_arg(const char *arg)
 {
     return stoi(++arg);
+}
+
+const char *extract_name_from_arg(const char *arg)
+{
+    return ++arg;
 }
 
 void display_wrong_file_extension_message()
@@ -685,4 +872,5 @@ void cla_version()
     cout << "Development Version" << endl;
     cout << "==============================================" << endl;
 }
+
 #pragma endregion

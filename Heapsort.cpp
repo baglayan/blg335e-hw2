@@ -54,7 +54,7 @@ inline void swap_elements(City &c1, City &c2);
  * @param i The index whose parent index will be calculated.
  * @return int The hypothetical parent index of i.
  */
-inline int parent(unsigned int i);
+inline size_t parent(unsigned int i);
 
 /**
  * @brief Function to calculate the hypothetical left child index of an index.
@@ -62,7 +62,7 @@ inline int parent(unsigned int i);
  * @param i The index whose left child index will be calculated.
  * @return int The hypothetical left child index of i.
  */
-inline int left(unsigned int i);
+inline size_t left(unsigned int i);
 
 /**
  * @brief Function to calculate the hypothetical right child index of an index.
@@ -70,7 +70,7 @@ inline int left(unsigned int i);
  * @param i The index whose right child index will be calculated.
  * @return int The hypothetical right child index of i.
  */
-inline int right(unsigned int i);
+inline size_t right(unsigned int i);
 
 /**
  * @brief Extracts the number from the optional arguments such as "d3".
@@ -133,7 +133,7 @@ public:
      * @throw `out_of_range` if i is out of range of the heap.
      *
      */
-    City &operator[](int i)
+    City &operator[](size_t i)
     {
         if (i >= 1 && i <= size)
         {
@@ -190,9 +190,9 @@ public:
      */
     void max_heapify(size_t i)
     {
-        int l = left(i);
-        int r = right(i);
-        int largest;
+        size_t l = left(i);
+        size_t r = right(i);
+        size_t largest;
 
         if (l <= this->size && (*this)[l].population > (*this)[i].population)
         {
@@ -348,7 +348,6 @@ public:
         }
     }
 };
-
 
 /**
  * @brief Function to execute a function and measure its runtime.
@@ -523,7 +522,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
-        //execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", indexToOperate, keyToOperate);
+        // execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", indexToOperate, keyToOperate);
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
@@ -547,7 +546,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
-        //execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", indexToOperate, keyToOperate);
+        // execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", indexToOperate, keyToOperate);
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
@@ -579,17 +578,17 @@ inline void swap_elements(City &c1, City &c2)
     c2 = temp;
 }
 
-inline int parent(unsigned int i)
+inline size_t parent(unsigned int i)
 {
     return i >> 1;
 }
 
-inline int left(unsigned int i)
+inline size_t left(unsigned int i)
 {
     return i << 1;
 }
 
-inline int right(unsigned int i)
+inline size_t right(unsigned int i)
 {
     return (i << 1) + 1;
 }

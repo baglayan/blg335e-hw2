@@ -4,9 +4,8 @@
  *
  * Name: Meriç Bağlayan
  * Id  : 150190056
- * Date: 2023-12-02
+ * Date: 2023-12-07
  *
- * Non-functional messy code as it is in development.
  */
 
 #include <iostream>
@@ -21,43 +20,6 @@
 
 using namespace std;
 
-/**
- *
- *
- *
- *
- *
- *
- * DO
- *
- * NOT
- *
- * FORGET
- *
- * TO
- *
- * UPDATE
- *
- * FOR
- *
- * CITY
- *
- * NAME
- *
- * ARGUMENT
- *
- * FOR
- *
- * INSERT
- *
- * OPERATIONS
- *
- *
- *
- *
- *
- *
- */
 enum Args
 {
     EXECUTABLE = 0,
@@ -72,7 +34,7 @@ enum Args
 struct City
 {
     string name;
-    int population;
+    long long int population;
 };
 
 #pragma region Function declarations
@@ -135,15 +97,15 @@ inline size_t right(size_t i);
  * @param arg The optional argument from which the number will be extracted.
  * @return size_t The number extracted from the optional argument.
  */
-const size_t extract_number_from_arg(const char *arg);
+const long long int extract_number_from_arg(const char *arg);
 
 /**
- * @brief Extracts the name from the optional arguments such as "nBursa".
+ * @brief Extracts the city from the optional arguments such as "k_Tekirdag_204000".
  *
  * @param arg The optional argument from which the number will be extracted.
- * @return The name extracted from the optional argument.
+ * @return The city extracted from the optional argument.
  */
-const char *extract_name_from_arg(const char *arg);
+City extract_city_info_from_arg(const char *arg);
 
 /**
  * @brief Function to display the time elapsed.
@@ -226,14 +188,6 @@ public:
     }
 
     /**
-     * @brief Destroy the Heap object
-     *
-     */
-    ~Heap()
-    {
-        array.clear();
-    }
-    /**
      * @brief Construct a new d-ary Heap object.
      *
      * @param a The array that will be used to create the heap.
@@ -245,6 +199,15 @@ public:
         array = a;
         size = n;
         d = k;
+    }
+
+    /**
+     * @brief Destroy the Heap object
+     *
+     */
+    ~Heap()
+    {
+        array.clear();
     }
 
     /**
@@ -301,8 +264,19 @@ public:
      *
      * @return EXIT_FAILURE if heap overflow, EXIT_SUCCESS otherwise.
      */
-    int max_heap_insert(City &node)
+    void max_heap_insert(City &newCity)
     {
+        this->build_max_heap(size);
+        if (size == array.max_size())
+        {
+            throw overflow_error("Heap overflow");
+        }
+        size++;
+        City newCityPreChange = newCity;
+        newCity.population = INT_MIN;
+        array.push_back(newCity);
+
+        this->heap_increase_key(size, newCityPreChange);
     }
 
     /**
@@ -314,7 +288,7 @@ public:
     {
         if (this->size < 1)
         {
-            throw out_of_range("Heap underflow");
+            throw underflow_error("Heap underflow");
         }
         return (*this)[1];
     }
@@ -339,14 +313,13 @@ public:
      * @param index The index of the node whose key will be increased.
      * @param newKey The new key value.
      */
-    void heap_increase_key(unsigned int index, int newKey)
-    // might actually need to use a proper City instead of index here
+    void heap_increase_key(unsigned int index, City newKey)
     {
-        if (newKey < (*this)[index].population)
+        if (newKey.population < (*this)[index].population)
         {
             throw invalid_argument("New key is smaller than current key");
         }
-        (*this)[index].population = newKey;
+        (*this)[index].population = newKey.population;
         while (index > 1 && (*this)[parent(index)].population < (*this)[index].population)
         {
             swap_elements((*this)[index], (*this)[parent(index)]);
@@ -381,9 +354,10 @@ public:
     }
 
     /**
-     * @brief
+     * @brief Function that builds a max d-ary heap from the d-ary heap.
      *
-     * @param n
+     * @param n Size of the heap.
+     *
      */
     void dary_build_max_heap(size_t n)
     {
@@ -401,7 +375,7 @@ public:
      */
     int dary_calculate_height()
     {
-        return ceil(log(size * d - size + 1) / log(this->d)) - 1;
+        return ceil(log(size * d - size + 1) / log(d)) - 1;
     }
 
     /**
@@ -419,6 +393,8 @@ public:
      */
     void dary_insert_element(City &node)
     {
+        dary_build_max_heap(size);
+        // implement
     }
 
     /**
@@ -427,12 +403,14 @@ public:
      * @param index The index of the node whose key will be increased.
      * @param newKey The new key value.
      */
-    void dary_increase_key(unsigned int index, int newKey)
+    void dary_increase_key(unsigned int index, City newKey)
     {
     }
 
     /**
      * @brief Function that sorts a Heap object using heapsort.
+     *
+     * @param n Size of the heap.
      *
      */
     void heapsort(size_t n)
@@ -446,6 +424,12 @@ public:
         }
     };
 
+    /**
+     * @brief Function that sorts a d-ary Heap object using heapsort.
+     *
+     * @param n Size of the heap.
+     *
+     */
     void dary_heapsort(size_t n)
     {
         this->dary_build_max_heap(n);
@@ -457,6 +441,12 @@ public:
         }
     }
 
+    /**
+     * @brief Function that prints the heap to an output file.
+     *
+     * @param outputFile The output file to which the heap will be printed.
+     * @param n Size of the heap.
+     */
     void print_to_output_file(ofstream &outputFile, size_t n)
     {
         size = n;
@@ -557,14 +547,14 @@ int main(int argc, const char **argv)
     const string function = argv[FUNCTION];
     unsigned int argD;
     size_t argI;
-    int argK;
+    City argK;
 
     switch (argc - 4)
     {
     case 0:
         argD = 2;
         argI = 0;
-        argK = 0;
+        argK = {"", 0};
         break;
     case 1:
         if (argv[OPTIONAL1][0] == 'd')
@@ -577,7 +567,7 @@ int main(int argc, const char **argv)
         }
         else if (argv[OPTIONAL1][0] == 'k')
         {
-            argK = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
         }
         else
         {
@@ -598,22 +588,22 @@ int main(int argc, const char **argv)
         else if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k')
         {
             argD = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
         }
         else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd')
         {
             argD = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
         }
         else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k')
         {
             argI = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
         }
         else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i')
         {
             argI = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
         }
         else
         {
@@ -625,37 +615,37 @@ int main(int argc, const char **argv)
         {
             argD = extract_number_from_arg(argv[OPTIONAL1]);
             argI = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_number_from_arg(argv[OPTIONAL3]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL3]);
         }
         if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'i')
         {
             argD = extract_number_from_arg(argv[OPTIONAL1]);
             argI = extract_number_from_arg(argv[OPTIONAL3]);
-            argK = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
         }
         if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'k')
         {
             argD = extract_number_from_arg(argv[OPTIONAL2]);
             argI = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_number_from_arg(argv[OPTIONAL3]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL3]);
         }
         if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'd')
         {
             argD = extract_number_from_arg(argv[OPTIONAL3]);
             argI = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_number_from_arg(argv[OPTIONAL2]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
         }
         if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'i')
         {
             argD = extract_number_from_arg(argv[OPTIONAL2]);
             argI = extract_number_from_arg(argv[OPTIONAL3]);
-            argK = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
         }
         if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'd')
         {
             argD = extract_number_from_arg(argv[OPTIONAL3]);
             argI = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_number_from_arg(argv[OPTIONAL1]);
+            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
         }
         else
         {
@@ -684,7 +674,7 @@ int main(int argc, const char **argv)
         switch (argD)
         {
         case 2:
-            execute_and_measure(heap, &Heap::dary_heapsort, "heapsort", vectorSize);
+            execute_and_measure(heap, &Heap::heapsort, "heapsort", vectorSize);
             break;
         default:
             execute_and_measure(heap, &Heap::dary_heapsort, "heapsort", vectorSize);
@@ -693,7 +683,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
-        // execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", argI, argK);
+        execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", argK);
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
@@ -717,7 +707,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
-        // execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", argI, argK);
+        execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", argK);
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
@@ -777,14 +767,33 @@ inline size_t right(size_t i)
 #pragma endregion
 
 #pragma region Command line argument handler functions
-const size_t extract_number_from_arg(const char *arg)
+const long long int extract_number_from_arg(const char *arg)
 {
     return stoi(++arg);
 }
 
-const char *extract_name_from_arg(const char *arg)
+City extract_city_info_from_arg(const char *arg)
 {
-    return ++arg;
+    string argString(arg);
+    size_t underscoreIndex = argString.find("_");
+    if (underscoreIndex != string::npos)
+    {
+        stringstream stream(arg);
+        string cityInfo;
+        vector<string> cityInfoVector;
+
+        while (getline(stream, cityInfo, '_'))
+        {
+            cityInfoVector.push_back(cityInfo);
+        }
+
+        City city = {cityInfoVector[1], stoi(cityInfoVector[2])};
+        return city;
+    }
+    else
+    {
+        return {"NO_CITY_NAME", stoll(arg++)};
+    }
 }
 
 void display_wrong_file_extension_message()
@@ -829,7 +838,7 @@ void execute_and_measure(Heap &heap, Func func, const string &functionName, Args
     auto end = chrono::high_resolution_clock::now();
     auto timeElapsed = chrono::duration_cast<chrono::nanoseconds>(end - start);
 
-    display_time_elapsed(timeElapsed.count(), functionName);
+    display_time_elapsed(timeElapsed.count(), functionName); // might not stay this way
 }
 
 void display_time_elapsed(auto time, const string function)
@@ -840,7 +849,7 @@ void display_time_elapsed(auto time, const string function)
 
 void cla_help()
 {
-    cout << "Usage: ./Heapsort <DATASET-FILE-NAME>.csv <FUNCTION-NAME> <OUTPUT-FILE-NAME>.csv ([d<#>] | [i<#>] [k<#>])\n"
+    cout << "Usage: ./Heapsort <DATASET-FILE-NAME>.csv <FUNCTION-NAME> <OUTPUT-FILE-NAME>.csv ([d<#>] [i<#>] [k<#>])\n"
          << "Options:\n"
          << "  <DATASET-FILE-NAME>.csv:  The name of the dataset file. Must be a .csv file with semicolon as the delimiter.\n"
          << "  <FUNCTION-NAME>:  The name of the function to be used. Must be one of the following:\n"

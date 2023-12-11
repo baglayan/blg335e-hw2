@@ -37,7 +37,7 @@ struct City
     long long int population;
 };
 
-#pragma region Function declarations
+// Function declarations
 
 /**
  * @brief Function to swap two elements.
@@ -97,7 +97,7 @@ inline size_t right(size_t i);
  * @param arg The optional argument from which the number will be extracted.
  * @return size_t The number extracted from the optional argument.
  */
-const long long int extract_number_from_arg(const char *arg);
+long long int extract_number_from_arg(const char *arg);
 
 /**
  * @brief Extracts the city from the optional arguments such as "k_Tekirdag_204000".
@@ -113,7 +113,7 @@ City extract_city_info_from_arg(const char *arg);
  * @param time The time elapsed.
  * @param function The name of the function that was executed.
  */
-void display_time_elapsed(auto time, const string function);
+void display_time_elapsed(chrono::_V2::high_resolution_clock::rep time, const string function);
 
 /**
  * @brief Function to display the wrong usage message.
@@ -137,7 +137,6 @@ void cla_help();
  * @brief Function to display the version message.
  */
 void cla_version();
-#pragma endregion
 
 /**
  * @brief Class that represents a heap.
@@ -266,7 +265,6 @@ public:
      */
     void max_heap_insert(City &newCity)
     {
-        this->build_max_heap(size);
         if (size == array.max_size())
         {
             throw overflow_error("Heap overflow");
@@ -384,6 +382,11 @@ public:
      */
     City dary_extract_max()
     {
+        City max = this->heap_maximum();
+        (*this)[1] = (*this)[this->size];
+        this->size--;
+        this->dary_max_heapify(1);
+        return max;
     }
 
     /**
@@ -393,8 +396,16 @@ public:
      */
     void dary_insert_element(City &node)
     {
-        dary_build_max_heap(size);
-        // implement
+        if (size == array.max_size())
+        {
+            throw overflow_error("Heap overflow");
+        }
+        size++;
+        City newCityPreChange = node;
+        node.population = INT_MIN;
+        array.push_back(node);
+
+        this->dary_increase_key(size, newCityPreChange);
     }
 
     /**
@@ -405,6 +416,16 @@ public:
      */
     void dary_increase_key(unsigned int index, City newKey)
     {
+        if (newKey.population < (*this)[index].population)
+        {
+            throw invalid_argument("New key is smaller than current key");
+        }
+        (*this)[index].population = newKey.population;
+        while (index > 1 && (*this)[dary_parent(index, d)].population < (*this)[index].population)
+        {
+            swap_elements((*this)[index], (*this)[dary_parent(index, d)]);
+            index = dary_parent(index, d);
+        }
     }
 
     /**
@@ -683,6 +704,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", argK);
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
@@ -707,6 +729,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", argK);
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
@@ -731,7 +754,7 @@ int main(int argc, const char **argv)
     return EXIT_SUCCESS;
 }
 
-#pragma region Sorting helper functions
+// Sorting helper functions
 inline void swap_elements(City &c1, City &c2)
 {
     City temp = c1;
@@ -764,10 +787,8 @@ inline size_t right(size_t i)
     return (i << 1) + 1;
 }
 
-#pragma endregion
-
-#pragma region Command line argument handler functions
-const long long int extract_number_from_arg(const char *arg)
+// Command line argument handler functions
+long long int extract_number_from_arg(const char *arg)
 {
     return stoi(++arg);
 }
@@ -841,7 +862,7 @@ void execute_and_measure(Heap &heap, Func func, const string &functionName, Args
     display_time_elapsed(timeElapsed.count(), functionName); // might not stay this way
 }
 
-void display_time_elapsed(auto time, const string function)
+void display_time_elapsed(chrono::_V2::high_resolution_clock::rep time, const string function)
 {
     cout << "Time taken by " << function << ": "
          << time << " ns." << endl;
@@ -881,5 +902,3 @@ void cla_version()
     cout << "Development Version" << endl;
     cout << "==============================================" << endl;
 }
-
-#pragma endregion

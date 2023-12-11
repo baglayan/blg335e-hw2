@@ -8,15 +8,16 @@
  *
  */
 
-#include <iostream>
-#include <string.h>
-#include <time.h>
-#include <chrono>  // for measuring runtime
-#include <fstream> // for reading csv files
-#include <sstream> // for reading csv files
-#include <vector>  // for creating vectors
-#include <climits> // for sentinel
-#include <cmath>
+#include <iostream>      // for input and output operations
+#include <string.h>      // for strings and string operations
+#include <chrono>        // for measuring runtime
+#include <fstream>       // for reading csv files
+#include <sstream>       // for reading csv files
+#include <vector>        // for creating vectors
+#include <unordered_map> // for handling optional command line arguments
+#include <functional>    // for handling optional command line arguments
+#include <climits>       // for sentinel
+#include <cmath>         // for math operations
 
 using namespace std;
 
@@ -542,7 +543,7 @@ int main(int argc, const char **argv)
     string firstLine;
     getline(datasetFile, firstLine);
 
-    // Remove UTF-8 BOM if it exists
+    // Remove UTF-8 byte order mark if it exists
     if (!firstLine.empty() && firstLine[0] == '\xEF' && firstLine[1] == '\xBB' && firstLine[2] == '\xBF')
     {
         firstLine.erase(0, 3);
@@ -570,121 +571,53 @@ int main(int argc, const char **argv)
     size_t argI;
     City argK;
 
-    switch (argc - 4)
+    unordered_map<char, std::function<void(const char *)>> argMap = {
+        {'d', [&](const char *arg)
+         { argD = extract_number_from_arg(arg); }},
+        {'i', [&](const char *arg)
+         { argI = extract_number_from_arg(arg); }},
+        {'k', [&](const char *arg)
+         { argK = extract_city_info_from_arg(arg); }}};
+
+    int optionalArgc = argc - 4;
+
+    if (optionalArgc == 0)
     {
-    case 0:
         argD = 2;
         argI = 0;
         argK = {"", 0};
-        break;
-    case 1:
-        if (argv[OPTIONAL1][0] == 'd')
+    }
+    else if (optionalArgc >= 1 && optionalArgc <= 3)
+    {
+        for (int i = 0; i < optionalArgc; ++i)
         {
-            argD = extract_number_from_arg(argv[OPTIONAL1]);
+            char optionLetter = argv[i + OPTIONAL1][0];
+
+            if (argMap.find(optionLetter) != argMap.end())
+            {
+                argMap[optionLetter](argv[i + OPTIONAL1]);
+            }
+            else
+            {
+                display_wrong_usage_message(argc, argv);
+                return EXIT_FAILURE;
+            }
         }
-        else if (argv[OPTIONAL1][0] == 'i')
-        {
-            argI = extract_number_from_arg(argv[OPTIONAL1]);
-        }
-        else if (argv[OPTIONAL1][0] == 'k')
-        {
-            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
-        }
-        else
-        {
-            display_wrong_usage_message(argc, argv);
-        }
-        break;
-    case 2:
-        if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL1]);
-            argI = extract_number_from_arg(argv[OPTIONAL2]);
-        }
-        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL2]);
-            argI = extract_number_from_arg(argv[OPTIONAL1]);
-        }
-        else if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
-        }
-        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
-        }
-        else if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k')
-        {
-            argI = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
-        }
-        else if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i')
-        {
-            argI = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
-        }
-        else
-        {
-            display_wrong_usage_message(argc, argv);
-        }
-        break;
-    case 3:
-        if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'k')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL1]);
-            argI = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL3]);
-        }
-        if (argv[OPTIONAL1][0] == 'd' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'i')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL1]);
-            argI = extract_number_from_arg(argv[OPTIONAL3]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
-        }
-        if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'k')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL2]);
-            argI = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL3]);
-        }
-        if (argv[OPTIONAL1][0] == 'i' && argv[OPTIONAL2][0] == 'k' && argv[OPTIONAL3][0] == 'd')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL3]);
-            argI = extract_number_from_arg(argv[OPTIONAL1]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL2]);
-        }
-        if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'd' && argv[OPTIONAL3][0] == 'i')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL2]);
-            argI = extract_number_from_arg(argv[OPTIONAL3]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
-        }
-        if (argv[OPTIONAL1][0] == 'k' && argv[OPTIONAL2][0] == 'i' && argv[OPTIONAL3][0] == 'd')
-        {
-            argD = extract_number_from_arg(argv[OPTIONAL3]);
-            argI = extract_number_from_arg(argv[OPTIONAL2]);
-            argK = extract_city_info_from_arg(argv[OPTIONAL1]);
-        }
-        else
-        {
-            display_wrong_usage_message(argc, argv);
-        }
-        break;
-    default:
+    }
+    else
+    {
         display_wrong_usage_message(argc, argv);
-        break;
+        return EXIT_FAILURE;
     }
 
     size_t vectorSize = cities.size();
     Heap heap(cities, cities.size(), argD);
 
+    // Using a function map turns out just as long.
     if (strcmp(function.c_str(), "max_heapify") == 0)
     {
-        size_t floor_size_over_two = vectorSize >> 1;
-        execute_and_measure(heap, &Heap::max_heapify, "max_heapify", floor_size_over_two);
+        // size_t floor_size_over_two = vectorSize >> 1;
+        execute_and_measure(heap, &Heap::max_heapify, "max_heapify", argI);
     }
     else if (strcmp(function.c_str(), "build_max_heap") == 0)
     {
@@ -709,14 +642,17 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::heap_extract_max, "heap_extract_max");
     }
     else if (strcmp(function.c_str(), "heap_increase_key") == 0)
     {
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::heap_increase_key, "heap_increase_key", argI, argK);
     }
     else if (strcmp(function.c_str(), "heap_maximum") == 0)
     {
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::heap_maximum, "heap_maximum");
     }
     else if (strcmp(function.c_str(), "dary_calculate_height") == 0)
@@ -725,6 +661,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "dary_extract_max") == 0)
     {
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::dary_extract_max, "dary_extract_max");
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
@@ -734,6 +671,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::dary_increase_key, "dary_increase_key", argI, argK);
     }
     else
@@ -790,7 +728,7 @@ inline size_t right(size_t i)
 // Command line argument handler functions
 long long int extract_number_from_arg(const char *arg)
 {
-    return stoi(++arg);
+    return stoll(++arg);
 }
 
 City extract_city_info_from_arg(const char *arg)
@@ -808,7 +746,7 @@ City extract_city_info_from_arg(const char *arg)
             cityInfoVector.push_back(cityInfo);
         }
 
-        City city = {cityInfoVector[1], stoi(cityInfoVector[2])};
+        City city = {cityInfoVector[1], stoll(cityInfoVector[2])};
         return city;
     }
     else

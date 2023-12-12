@@ -252,12 +252,10 @@ public:
     /**
      * @brief Function that builds a max heap from the heap.
      *
-     * @param n Size of the heap.
      */
-    void build_max_heap(size_t n)
+    void build_max_heap()
     {
-        size = n; // set heap size to n
-        for (int i = n >> 1; i >= 1; i--)
+        for (int i = size >> 1; i >= 1; i--)
         {
             max_heapify(i);
         }
@@ -364,10 +362,9 @@ public:
      * @param n Size of the heap.
      *
      */
-    void dary_build_max_heap(size_t n)
+    void dary_build_max_heap()
     {
-        size = n;
-        for (int i = floor((n - 2) / d + 1); i >= 1; i--)
+        for (int i = floor((size - 2) / d + 1); i >= 1; i--)
         {
             dary_max_heapify(i);
         }
@@ -438,13 +435,11 @@ public:
     /**
      * @brief Function that sorts a Heap object using heapsort.
      *
-     * @param n Size of the heap.
-     *
      */
-    void heapsort(size_t n)
+    void heapsort()
     {
-        this->build_max_heap(n);
-        for (size_t i = n; i >= 2; i--)
+        this->build_max_heap();
+        for (size_t i = size; i >= 2; i--)
         {
             swap_elements((*this)[1], (*this)[i]);
             size--;
@@ -455,13 +450,11 @@ public:
     /**
      * @brief Function that sorts a d-ary Heap object using heapsort.
      *
-     * @param n Size of the heap.
-     *
      */
-    void dary_heapsort(size_t n)
+    void dary_heapsort()
     {
-        this->dary_build_max_heap(n);
-        for (size_t i = n; i >= 2; i--)
+        this->dary_build_max_heap();
+        for (size_t i = size; i >= 2; i--)
         {
             swap_elements((*this)[1], (*this)[i]);
             size--;
@@ -638,7 +631,7 @@ int main(int argc, const char **argv)
     }
     else if (strcmp(function.c_str(), "build_max_heap") == 0)
     {
-        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap");
         heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "heapsort") == 0)
@@ -646,55 +639,55 @@ int main(int argc, const char **argv)
         switch (argD)
         {
         case 2:
-            execute_and_measure(heap, &Heap::heapsort, "heapsort", vectorSize);
+            execute_and_measure(heap, &Heap::heapsort, "heapsort");
             break;
         default:
-            execute_and_measure(heap, &Heap::dary_heapsort, "heapsort", vectorSize);
+            execute_and_measure(heap, &Heap::dary_heapsort, "heapsort");
             break;
         }
         heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
-        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap");
         execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", argK);
         heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
-        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap");
         execute_measure_print(outputFile, heap, &Heap::heap_extract_max, "heap_extract_max");
     }
     else if (strcmp(function.c_str(), "heap_increase_key") == 0)
     {
-        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap");
         execute_and_measure(heap, &Heap::heap_increase_key, "heap_increase_key", argI, argK);
         heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "heap_maximum") == 0)
     {
-        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap");
         execute_measure_print(outputFile, heap, &Heap::heap_maximum, "heap_maximum");
     }
     else if (strcmp(function.c_str(), "dary_calculate_height") == 0)
     {
-        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap");
         execute_measure_print(outputFile, heap, &Heap::dary_calculate_height, "dary_calculate_height");
     }
     else if (strcmp(function.c_str(), "dary_extract_max") == 0)
     {
-        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap");
         execute_measure_print(outputFile, heap, &Heap::dary_extract_max, "dary_extract_max");
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
-        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap");
         execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", argK);
         heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
-        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap");
         execute_and_measure(heap, &Heap::dary_increase_key, "dary_increase_key", argI, argK);
         heap.print_to_output_file(outputFile, vectorSize);
     }

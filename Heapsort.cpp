@@ -9,6 +9,7 @@
  */
 
 #include <iostream>      // for input and output operations
+#include <typeinfo>      // for typeid
 #include <string.h>      // for strings and string operations
 #include <chrono>        // for measuring runtime
 #include <fstream>       // for reading csv files
@@ -28,10 +29,15 @@ enum Args
     FUNCTION = 2,
     OUTPUT = 3,
     OPTIONAL1 = 4,
-    OPTIONAL2 = 5,
-    OPTIONAL3 = 6
+    OPTIONAL2 = 5, // unused in current implementation
+    OPTIONAL3 = 6  // ditto
 };
 
+/**
+ * @brief Struct that represents a city with
+ * a name and a population.
+ *
+ */
 struct City
 {
     string name;
@@ -184,7 +190,7 @@ public:
     {
         array = a;
         size = n;
-        d = 2;
+        d = 2; // construct a binary heap if d is not specified. not actually used in this project
     }
 
     /**
@@ -219,24 +225,24 @@ public:
      */
     void max_heapify(size_t i)
     {
-        size_t l = left(i);
-        size_t r = right(i);
-        size_t largest;
+        size_t l = left(i);  // left child index
+        size_t r = right(i); // right child index
+        size_t largest;      // index of the largest element during comparisons among heap[i], heap[l] and heap[r]
 
-        if (l <= this->size && (*this)[l].population > (*this)[i].population)
+        if (l <= this->size && (*this)[l].population > (*this)[i].population) // check for left child
         {
             largest = l;
         }
         else
         {
-            largest = i;
+            largest = i; // if left child is not larger than heap[i], heap[i] is the largest
         }
-        if (r <= this->size && (*this)[r].population > (*this)[largest].population)
+        if (r <= this->size && (*this)[r].population > (*this)[largest].population) // check for right child
         {
             largest = r;
         }
 
-        if (largest != i)
+        if (largest != i) // if heap[i] is not the largest, swap it with the largest and call max_heapify on the largest
         {
             swap_elements((*this)[i], (*this)[largest]);
             this->max_heapify(largest);
@@ -250,7 +256,7 @@ public:
      */
     void build_max_heap(size_t n)
     {
-        size = n;
+        size = n; // set heap size to n
         for (int i = n >> 1; i >= 1; i--)
         {
             max_heapify(i);
@@ -374,7 +380,7 @@ public:
      */
     int dary_calculate_height()
     {
-        return ceil(log(size * d - size + 1) / log(d)) - 1;
+        return ceil(log(size * d - size + 1) / log(d));
     }
 
     /**
@@ -401,12 +407,12 @@ public:
         {
             throw overflow_error("Heap overflow");
         }
-        size++;
-        City newCityPreChange = node;
-        node.population = INT_MIN;
-        array.push_back(node);
+        size++;                       // increase heap size to accomodate new node
+        City newCityPreChange = node; // save node before modifying it
+        node.population = INT_MIN;    // set population to negative sentinel
+        array.push_back(node);        // add node to the end of the array
 
-        this->dary_increase_key(size, newCityPreChange);
+        this->dary_increase_key(size, newCityPreChange); // increase key of the node to its actual value
     }
 
     /**
@@ -489,6 +495,9 @@ public:
  */
 template <typename Func, typename... Args>
 void execute_and_measure(Heap &heap, Func func, const string &functionName, Args... args);
+
+template <typename Func, typename... Args>
+void execute_measure_print(ofstream &outputFile, Heap &heap, Func func, const string &functionName, Args... args);
 
 /**
  * @brief Main driver function.
@@ -610,6 +619,13 @@ int main(int argc, const char **argv)
         return EXIT_FAILURE;
     }
 
+    ofstream outputFile(outputName, ofstream::out);
+    if (!outputFile.is_open())
+    {
+        cerr << "Could not open the output file " << outputName << "." << endl;
+        return EXIT_FAILURE;
+    }
+
     size_t vectorSize = cities.size();
     Heap heap(cities, cities.size(), argD);
 
@@ -618,10 +634,12 @@ int main(int argc, const char **argv)
     {
         // size_t floor_size_over_two = vectorSize >> 1;
         execute_and_measure(heap, &Heap::max_heapify, "max_heapify", argI);
+        heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "build_max_heap") == 0)
     {
         execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
+        heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "heapsort") == 0)
     {
@@ -634,45 +652,51 @@ int main(int argc, const char **argv)
             execute_and_measure(heap, &Heap::dary_heapsort, "heapsort", vectorSize);
             break;
         }
+        heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "max_heap_insert") == 0)
     {
         execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::max_heap_insert, "max_heap_insert", argK);
+        heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "heap_extract_max") == 0)
     {
         execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
-        execute_and_measure(heap, &Heap::heap_extract_max, "heap_extract_max");
+        execute_measure_print(outputFile, heap, &Heap::heap_extract_max, "heap_extract_max");
     }
     else if (strcmp(function.c_str(), "heap_increase_key") == 0)
     {
         execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::heap_increase_key, "heap_increase_key", argI, argK);
+        heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "heap_maximum") == 0)
     {
         execute_and_measure(heap, &Heap::build_max_heap, "build_max_heap", vectorSize);
-        execute_and_measure(heap, &Heap::heap_maximum, "heap_maximum");
+        execute_measure_print(outputFile, heap, &Heap::heap_maximum, "heap_maximum");
     }
     else if (strcmp(function.c_str(), "dary_calculate_height") == 0)
     {
-        execute_and_measure(heap, &Heap::dary_calculate_height, "dary_calculate_height");
+        execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
+        execute_measure_print(outputFile, heap, &Heap::dary_calculate_height, "dary_calculate_height");
     }
     else if (strcmp(function.c_str(), "dary_extract_max") == 0)
     {
         execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
-        execute_and_measure(heap, &Heap::dary_extract_max, "dary_extract_max");
+        execute_measure_print(outputFile, heap, &Heap::dary_extract_max, "dary_extract_max");
     }
     else if (strcmp(function.c_str(), "dary_insert_element") == 0)
     {
         execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::dary_insert_element, "dary_insert_element", argK);
+        heap.print_to_output_file(outputFile, vectorSize);
     }
     else if (strcmp(function.c_str(), "dary_increase_key") == 0)
     {
         execute_and_measure(heap, &Heap::dary_build_max_heap, "dary_build_max_heap", vectorSize);
         execute_and_measure(heap, &Heap::dary_increase_key, "dary_increase_key", argI, argK);
+        heap.print_to_output_file(outputFile, vectorSize);
     }
     else
     {
@@ -680,13 +704,6 @@ int main(int argc, const char **argv)
         return EXIT_FAILURE;
     }
 
-    ofstream outputFile(outputName, ofstream::out);
-    if (!outputFile.is_open())
-    {
-        cerr << "Could not open the output file " << outputName << "." << endl;
-        return EXIT_FAILURE;
-    }
-    heap.print_to_output_file(outputFile, vectorSize);
     outputFile.close();
 
     return EXIT_SUCCESS;
@@ -791,13 +808,45 @@ void display_wrong_usage_message(int argc, const char **argv)
 
 template <typename Func, typename... Args>
 void execute_and_measure(Heap &heap, Func func, const string &functionName, Args... args)
+// change the return type and return value of this so that it matches that of the function
 {
     auto start = chrono::high_resolution_clock::now();
+
     (heap.*func)(args...);
+
     auto end = chrono::high_resolution_clock::now();
     auto timeElapsed = chrono::duration_cast<chrono::nanoseconds>(end - start);
 
     display_time_elapsed(timeElapsed.count(), functionName); // might not stay this way
+}
+
+template <typename Func, typename... Args>
+void execute_measure_print(ofstream &outputFile, Heap &heap, Func func, const string &functionName, Args... args)
+// change the return type and return value of this so that it matches that of the function
+{
+    auto start = chrono::high_resolution_clock::now();
+
+    auto result = (heap.*func)(args...);
+
+    auto end = chrono::high_resolution_clock::now();
+    auto timeElapsed = chrono::duration_cast<chrono::nanoseconds>(end - start);
+
+    display_time_elapsed(timeElapsed.count(), functionName); // might not stay this way
+
+    if (typeid(result) == typeid(City))
+    {
+        City &cityResult = reinterpret_cast<City &>(result);
+        outputFile << cityResult.name << ";" << cityResult.population;
+    }
+    else if (typeid(result) == typeid(int))
+    {
+        int intResult = reinterpret_cast<int &>(result);
+        outputFile << intResult;
+    }
+    else
+    {
+        cerr << "Unknown return type of function: " << functionName << endl;
+    }
 }
 
 void display_time_elapsed(chrono::_V2::high_resolution_clock::rep time, const string function)

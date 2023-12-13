@@ -4,7 +4,7 @@
  *
  * Name: Meriç Bağlayan
  * Id  : 150190056
- * Date: 2023-12-11
+ * Date: 2023-12-13
  *
  */
 
@@ -255,7 +255,7 @@ public:
      */
     void build_max_heap()
     {
-        for (int i = size >> 1; i >= 1; i--)
+        for (int i = size >> 1; i >= 1; i--) // iteratively max heapify starting from the last pre-leaf node
         {
             max_heapify(i);
         }
@@ -270,16 +270,16 @@ public:
      */
     void max_heap_insert(City &newCity)
     {
-        if (size == array.max_size())
+        if (size == array.max_size()) // check for heap overflow
         {
             throw overflow_error("Heap overflow");
         }
-        size++;
-        City newCityPreChange = newCity;
-        newCity.population = INT_MIN;
-        array.push_back(newCity);
+        size++;                          // increase heap size to accomodate new node
+        City newCityPreChange = newCity; // save node before modifying it
+        newCity.population = INT_MIN;    // set population to negative sentinel
+        array.push_back(newCity);        // add node to the end of the array
 
-        this->heap_increase_key(size, newCityPreChange);
+        this->heap_increase_key(size, newCityPreChange); // increase key of the node to its actual value
     }
 
     /**
@@ -289,11 +289,11 @@ public:
      */
     City heap_maximum()
     {
-        if (this->size < 1)
+        if (this->size < 1) // check for heap underflow
         {
             throw underflow_error("Heap underflow");
         }
-        return (*this)[1];
+        return (*this)[1]; // return the first element of the max heap
     }
 
     /**
@@ -303,11 +303,11 @@ public:
      */
     City heap_extract_max()
     {
-        City max = this->heap_maximum();
-        (*this)[1] = (*this)[this->size];
-        this->size--;
-        this->max_heapify(1);
-        return max;
+        City max = this->heap_maximum();  // save the maximum element in a variable
+        (*this)[1] = (*this)[this->size]; // replace the maximum element with the last element of the heap
+        this->size--;                     // decrease the size of the heap
+        this->max_heapify(1);             // max heapify starting from the root
+        return max;                       // return the maximum element
     }
 
     /**
@@ -318,12 +318,14 @@ public:
      */
     void heap_increase_key(unsigned int index, City newKey)
     {
-        if (newKey.population < (*this)[index].population)
+        if (newKey.population < (*this)[index].population) // check for new key being smaller than current key
         {
             throw invalid_argument("New key is smaller than current key");
         }
-        (*this)[index].population = newKey.population;
-        while (index > 1 && (*this)[parent(index)].population < (*this)[index].population)
+
+        (*this)[index].population = newKey.population; // set the new key value
+
+        while (index > 1 && (*this)[parent(index)].population < (*this)[index].population) // swap elements until the max-heap property is restored
         {
             swap_elements((*this)[index], (*this)[parent(index)]);
             index = parent(index);
@@ -337,19 +339,20 @@ public:
      */
     void dary_max_heapify(size_t i)
     {
+        // Index of the largest element during comparisons among heap[i] and its children
         size_t largest = i;
 
         for (size_t child = d * (i - 1) + 2;
              child <= d * (i - 1) + d + 1;
-             child++)
+             child++) // iterate over children
         {
-            if (child <= this->size && (*this)[child].population > (*this)[largest].population)
+            if (child <= this->size && (*this)[child].population > (*this)[largest].population) // if child is larger than largest, set largest to child
             {
                 largest = child;
             }
         }
 
-        if (largest != i)
+        if (largest != i) // if heap[i] is not the largest, swap it with the largest and call max_heapify on the largest
         {
             swap_elements((*this)[i], (*this)[largest]);
             this->dary_max_heapify(largest);
@@ -362,7 +365,7 @@ public:
      * @param n Size of the heap.
      *
      */
-    void dary_build_max_heap()
+    void dary_build_max_heap() // iteratively max heapify starting from the last pre-leaf node
     {
         for (int i = floor((size - 2) / d + 1); i >= 1; i--)
         {
@@ -377,7 +380,7 @@ public:
      */
     int dary_calculate_height()
     {
-        return ceil(log(size * d - size + 1) / log(d));
+        return ceil(log(size * d - size + 1) / log(d)); // calculate the height of the heap using logarithms
     }
 
     /**
@@ -386,11 +389,11 @@ public:
      */
     City dary_extract_max()
     {
-        City max = this->heap_maximum();
-        (*this)[1] = (*this)[this->size];
-        this->size--;
-        this->dary_max_heapify(1);
-        return max;
+        City max = this->heap_maximum();  // save the maximum element in a variable
+        (*this)[1] = (*this)[this->size]; // replace the maximum element with the last element of the heap
+        this->size--;                     // decrease the size of the heap
+        this->dary_max_heapify(1);        // max heapify starting from the root
+        return max;                       // return the maximum element
     }
 
     /**
@@ -420,12 +423,14 @@ public:
      */
     void dary_increase_key(unsigned int index, City newKey)
     {
-        if (newKey.population < (*this)[index].population)
+        if (newKey.population < (*this)[index].population) // check for new key being smaller than current key
         {
             throw invalid_argument("New key is smaller than current key");
         }
-        (*this)[index].population = newKey.population;
-        while (index > 1 && (*this)[dary_parent(index, d)].population < (*this)[index].population)
+
+        (*this)[index].population = newKey.population; // set the new key value
+
+        while (index > 1 && (*this)[dary_parent(index, d)].population < (*this)[index].population) // swap elements until the max-heap property is restored
         {
             swap_elements((*this)[index], (*this)[dary_parent(index, d)]);
             index = dary_parent(index, d);
@@ -438,8 +443,8 @@ public:
      */
     void heapsort()
     {
-        this->build_max_heap();
-        for (size_t i = size; i >= 2; i--)
+        this->build_max_heap();            // build a max heap
+        for (size_t i = size; i >= 2; i--) // iteratively swap the first element with the ith element and max heapify the heap
         {
             swap_elements((*this)[1], (*this)[i]);
             size--;
@@ -453,8 +458,8 @@ public:
      */
     void dary_heapsort()
     {
-        this->dary_build_max_heap();
-        for (size_t i = size; i >= 2; i--)
+        this->dary_build_max_heap(); // build a max heap
+        for (size_t i = size; i >= 2; i--) // iteratively swap the first element with the ith element and max heapify the heap
         {
             swap_elements((*this)[1], (*this)[i]);
             size--;
@@ -705,9 +710,9 @@ int main(int argc, const char **argv)
 // Sorting helper functions
 inline void swap_elements(City &c1, City &c2)
 {
-    City temp = c1;
+    City temp = c1; // hold c1 in a temporary variable
     c1 = c2;
-    c2 = temp;
+    c2 = temp; // complete the swap
 }
 
 inline size_t dary_parent(size_t i, unsigned int d)
@@ -738,7 +743,7 @@ inline size_t right(size_t i)
 // Command line argument handler functions
 long long int extract_number_from_arg(const char *arg)
 {
-    return stoll(++arg);
+    return stoll(++arg); // discard first character which is either d or i, we only care about the number
 }
 
 City extract_city_info_from_arg(const char *arg)
@@ -850,7 +855,7 @@ void display_time_elapsed(chrono::_V2::high_resolution_clock::rep time, const st
 
 void cla_help()
 {
-    cout << "Usage: ./Heapsort <DATASET-FILE-NAME>.csv <FUNCTION-NAME> <OUTPUT-FILE-NAME>.csv ([d<#>] [i<#>] [k<#>])\n"
+    cout << "Usage: ./Heapsort <DATASET-FILE-NAME>.csv <FUNCTION-NAME> <OUTPUT-FILE-NAME>.csv ([d<#>] [i<#>] [k_<cityname>_<population>])\n"
          << "Options:\n"
          << "  <DATASET-FILE-NAME>.csv:  The name of the dataset file. Must be a .csv file with semicolon as the delimiter.\n"
          << "  <FUNCTION-NAME>:  The name of the function to be used. Must be one of the following:\n"
@@ -868,7 +873,7 @@ void cla_help()
          << "  <OUTPUT-FILE-NAME>.csv:  The name of the output file. Must be a .csv file with semicolon as the delimiter.\n"
          << "  [d<#>]:  Optional parameter to specify the number of children of non-leaf nodes. Example use: d5.\n"
          << "  [i<#>]:  Optional parameter to specify the index of a node.\n"
-         << "  [k<#>]:  Optional parameter to specify the key value to update an element. Must be used with i\n"
+         << "  [k_<cityname>_<population>]:  Optional parameter to specify the key value to update an element. Must be used with i\n"
          << "  i and k together are available only for the following functions:\n"
          << "    - heap_increase_key\n"
          << "    - dary_increase_key" << endl;
